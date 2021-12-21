@@ -17,6 +17,21 @@
 
 ;;; Code:
 
+(require 'ansi-color)
+
+;; i dont really like this hook but without it
+;; the compilation buffer cant really render
+;; ascii color codes consistently (or at least i havent found a way).
+;; will keep this for now
+(defun endless/colorize-compilation ()
+  "Colorize from `compilation-filter-start' to `point'."
+  (let ((inhibit-read-only t))
+    (ansi-color-apply-on-region
+     compilation-filter-start (point))))
+
+(add-hook 'compilation-filter-hook
+          #'endless/colorize-compilation)
+
 (defconst kind-highlights
   (let* ( (keywords '("let" "def" "get" "return" "type" "do" "case" "as"
 		      "for" "if" "else" "rewrite" "in" "with"))
@@ -39,6 +54,7 @@
     (modify-syntax-entry ?} ")" table)
     table))
 
+
 (defvar kind-mode-map nil "Keymap for kind mode.")
 
 (defun kind-typecheck-buffer ()
@@ -46,8 +62,8 @@
   (interactive)
   (compile (concat "kind " buffer-file-name)))
 
-(defun kind-run-buffer (term_name)
-  "Run a term."
+(defun kind-run-term (term_name)
+  "Run the term TERM_NAME."
   (interactive "sterm: ")
   (compile (concat "kind " term_name " --run")))
 
@@ -58,10 +74,13 @@
 ;;     (beginning-of-line)
 ;;     (indent-line-to (* 2 (car (syntax-ppss))))))
 
+(defmacro add-command (keybind function)
+  `(define-key kind-mode-map (kbd ,keybind) ,function))
+
 (progn
   (setq kind-mode-map (make-sparse-keymap))
-  (define-key kind-mode-map (kbd "C-c C-c") 'kind-typecheck-buffer)
-  (define-key kind-mode-map (kbd "C-c C-r") 'kind-run-buffer))
+  (add-command "C-c C-c" 'kind-typecheck-buffer)
+  (add-command "C-c C-r" 'kind-run-term))
 
 (define-derived-mode kind-mode fundamental-mode "Kind"
   "Major mode for editing Kind lang code."
