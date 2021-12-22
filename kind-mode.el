@@ -18,6 +18,7 @@
 ;;; Code:
 
 (require 'ansi-color)
+;; (require 'smie)
 
 ;; i dont really like this hook but without it
 ;; the compilation buffer cant really render
@@ -60,19 +61,25 @@
 (defun kind-typecheck-buffer ()
   "Typecheck the current file."
   (interactive)
-  (compile (concat "kind " buffer-file-name)))
+  (compile (concat "kind " (file-name-nondirectory buffer-file-name))))
 
 (defun kind-run-term (term_name)
   "Run the term TERM_NAME."
   (interactive "sterm: ")
   (compile (concat "kind " term_name " --run")))
 
-;; (defun kind-indent-function ()
-;;   "Line indenter.
-;; TODO: Make this better, it's very bad right now."
-;;   (save-excursion
-;;     (beginning-of-line)
-;;     (indent-line-to (* 2 (car (syntax-ppss))))))
+;; (defun kind-indent-current-line (kind token)
+;;   "Kind indenter."
+;;   (interactive)
+;;   (beggining-of-line)
+;;   (if (bobp)
+;;       (indent-line-to 0)
+;;     (let ((not-indented t) curr-indent)
+;;       (if (not (looking-at "^.*?:.*?$"))
+;; 	  (progn
+;; 	    (save-excursion
+;; 	      (forward-line -1)
+;; 	      (setq cur-indent (+ (current-indentation) default-tab-width))
 
 (defmacro add-command (keybind function)
   `(define-key kind-mode-map (kbd ,keybind) ,function))
@@ -86,9 +93,9 @@
   "Major mode for editing Kind lang code."
   (setq font-lock-defaults '(kind-highlights))
   (setq comment-start "//")
-  ;(setq indent-line-function #'kind-indent-function)
-  (use-local-map kind-mode-map)
+  ;;(setq indent-line-function #'kind-indent-function)
   ;; TODO: indentation
+  (use-local-map kind-mode-map)
   (set-syntax-table kind-mode-syntax-table))
 
 (provide 'kind-mode)
