@@ -61,10 +61,23 @@
   (interactive)
   (compile (concat "kind " (file-name-nondirectory buffer-file-name))))
 
-(defun kind-run-term (term_name)
-  "Run the term TERM_NAME."
-  (interactive "sterm: ")
-  (compile (concat "kind " term_name " --run")))
+(defun kind--find-entry-point ()
+  (interactive)
+  (save-excursion
+    (goto-char 0)
+    (re-search-forward "^\\(.*?\\)\\(?:(.*?)\\)?:.*?// kind-mode-entry-point" nil t)
+    (let ((term (match-string 1)))
+      (message term)
+      term)))
+      
+
+(defun kind-run-term ()
+  "Run the term TERM_NAME"
+  (interactive)
+  (let ((term (kind--find-entry-point)))
+    (if term
+      (compile (concat "kind " term " --run"))
+      (compile (concat "kind " (read-string "term: ") " --run")))))
 
 ;; (defun kind-indent-current-line (kind token)
 ;;   "Kind indenter."
