@@ -51,8 +51,6 @@
     (modify-syntax-entry ?\/ ". 12b" table)
     (modify-syntax-entry ?\n "> b" table)
     (modify-syntax-entry ?' "\"" table)
-    (modify-syntax-entry ?{ "(" table)
-    (modify-syntax-entry ?} ")" table)
     table))
 
 
@@ -89,8 +87,9 @@
   (add-command "C-c C-c" 'kind-typecheck-buffer)
   (add-command "C-c C-r" 'kind-run-term))
 
-(define-derived-mode kind-mode fundamental-mode "Kind"
+(define-derived-mode kind-mode prog-mode "Kind"
   "Major mode for editing Kind lang code."
+  (setq mode-name "Kind")
   (setq font-lock-defaults '(kind-highlights))
   (setq comment-start "//")
   ;;(setq indent-line-function #'kind-indent-function)
