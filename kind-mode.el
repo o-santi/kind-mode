@@ -34,9 +34,9 @@
           #'endless/colorize-compilation)
 
 (defconst kind-highlights
-  (let* ( (keywords '("let" "def" "get" "return" "type" "do" "case" "as"
+  (let* ( (keywords '("let" "def" "return" "type" "do" "case" "as" "match" "ask" 
 		      "for" "if" "else" "rewrite" "in" "with"))
-	  (constants '("true" "false" "refl" "mirror" "nil" "cons" "succ"))
+	  (constants '("true" "false" "refl" "mirror" "nil" "cons" "succ" "zero"))
 	  (builtins '("->" "::" "+" "!" "-" "*" "&" "/" "^" "<" ">" "|")))
     `((,(regexp-opt keywords 'symbols). 'font-lock-keyword-face)
       (,(regexp-opt constants 'symbols) . 'font-lock-constant-face)
@@ -56,10 +56,13 @@
 
 (defvar kind-mode-map nil "Keymap for kind mode.")
 
+(defvar kind-tab-width 2)
+
 (defun kind-typecheck-buffer ()
   "Typecheck the current file."
   (interactive)
-  (compile (concat "kind " (file-name-nondirectory buffer-file-name))))
+  (let ((default-directory "~/kindelia/Wikind"))
+    (compile (concat "kind2 check " buffer-file-name))))
 
 (defun kind--find-entry-point ()
   (interactive)
@@ -69,28 +72,38 @@
     (let ((term (match-string 1)))
       (message term)
       term)))
-      
 
 (defun kind-run-term ()
   "Run the term TERM_NAME"
   (interactive)
-  (let ((term (kind--find-entry-point)))
-    (if term
-      (compile (concat "kind " term " --run"))
-      (compile (concat "kind " (read-string "term: ") " --run")))))
+  (let ((default-directory "~/kindelia/Wikind"))
+    (compile (concat "kind2 eval " buffer-file-name))))
 
-;; (defun kind-indent-current-line (kind token)
+;; (defun kind-indent-current-line ()
 ;;   "Kind indenter."
 ;;   (interactive)
-;;   (beggining-of-line)
-;;   (if (bobp)
-;;       (indent-line-to 0)
-;;     (let ((not-indented t) curr-indent)
-;;       (if (not (looking-at "^.*?:.*?$"))
-;; 	  (progn
-;; 	    (save-excursion
-;; 	      (forward-line -1)
-;; 	      (setq cur-indent (+ (current-indentation) default-tab-width))
+;;   (let (indent
+;; 	boi-p  ;; begin of indent
+;; 	mode-eol-p
+;; 	(point (point)))
+;;     (save-excursion
+;;       (back-to-indentation)
+;;       (message (number-to-string (car (syntax-ppss))))
+;;       (setq indent (car (syntax-ppss))
+;; 	    boi-p (= point (point)))
+;;       (when (and (eq (char-after) ?\n)
+;; 		 (not boi-p))
+;; 	(setq indent 0))
+;;       (when boi-p
+;; 	(setq move-eol-p t))
+;;       (when (or (eq (char-after) ?\))
+;; 		(eq (char-after) ?\}))
+;; 	(setq indent (1- indent)))
+;;       (delete-region (line-beginning-position)
+;; 		     (point))
+;;       (indent-to (* kind-tab-width indent))
+;;       (when move-eol-p
+;; 	(move-end-of-line nil)))))
 
 (defmacro add-command (keybind function)
   `(define-key kind-mode-map (kbd ,keybind) ,function))
